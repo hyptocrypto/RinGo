@@ -1,14 +1,14 @@
 import asyncio
 import base64
 import io
+import random
 import time
 from uuid import uuid4
 
 import aiohttp
-from faker import Faker
 from PIL import Image
 
-fake = Faker()
+DEVICE_COUNT = 100
 
 
 def dummy_bytes():
@@ -27,10 +27,12 @@ async def send_post_request(session, device_id):
         )
 
 
-async def device_swarm(num_devices=100):
+async def device_swarm():
+    num_devices = random.randint(0, DEVICE_COUNT)
+    print(f"Device cnt {num_devices}")
     async with aiohttp.ClientSession() as session:
         tasks = []
-        for i in range(1, num_devices + 1):
+        for i in range(num_devices):
             task = asyncio.ensure_future(
                 send_post_request(session, device_id=str(uuid4()))
             )
@@ -40,6 +42,6 @@ async def device_swarm(num_devices=100):
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    for i in range(100):
+    while True:
         loop.run_until_complete(device_swarm())
-        time.sleep(1)
+        time.sleep(5)

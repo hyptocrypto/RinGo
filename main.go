@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/hyptocrypto/RinGo/buffer"
+	"github.com/hyptocrypto/RinGo/client"
 	"github.com/hyptocrypto/RinGo/config"
 )
 
@@ -42,23 +42,22 @@ func handleBuff(w http.ResponseWriter, r *http.Request) {
 		log.Println(msg)
 		return
 	}
-
-	deviceId, err := uuid.Parse(body.DeviceId)
-	if err != nil {
-		msg := "Invalid deviceId format"
+	client := client.ClientFromRequest(r)
+	if len(body.Data) == 0 {
+		msg := "Body must contain data"
 		http.Error(w, msg, http.StatusBadRequest)
 		log.Println(msg)
-		return
 	}
 
-	if err := buff.Write(deviceId, body.Data); err != nil {
+	// If all checks pass, write to the buffer
+	if err := buff.Write(client.ID, body.Data); err != nil {
 		msg := err.Error()
 		http.Error(w, msg, http.StatusInternalServerError)
 		log.Println(msg)
 		return
 	}
 
-	msg := fmt.Sprintf("Client(%v) data buffered", deviceId)
+	msg := fmt.Sprintf("Client(%v) data buffered", client.ID)
 	fmt.Fprint(w, msg)
 	log.Println(msg)
 }
