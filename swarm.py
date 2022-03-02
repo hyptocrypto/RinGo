@@ -8,7 +8,7 @@ from uuid import uuid4
 import aiohttp
 from PIL import Image
 
-DEVICE_COUNT = 100
+DEVICE_COUNT = 1000
 
 
 def dummy_bytes():

@@ -33,7 +33,6 @@ func NewBuffer(size uint16, readInterval uint16, readSize uint16, overwriteBuffe
 	}
 }
 
-// Write adds an item to the buffer if there is space.
 func (b *Buffer) Write(data []byte) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -49,7 +48,6 @@ func (b *Buffer) Write(data []byte) error {
 	return nil
 }
 
-// Read returns up to 15 items from the buffer.
 func (r *Buffer) Read() ReadChunk {
 	r.lock.Lock()
 	defer r.lock.Unlock()

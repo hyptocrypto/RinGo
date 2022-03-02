@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v2"
@@ -17,13 +18,13 @@ type Config struct {
 func LoadConfig(filename string) *Config {
 	data, err := os.ReadFile(filename)
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("error loading config: %v", err))
 	}
 
 	config := &Config{}
 	err = yaml.Unmarshal(data, config)
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("error loading config: %v", err))
 	}
 
 	return config

@@ -1,10 +1,10 @@
 port:
   ":5555"
 buffer_size:
-  100
+  1000
 overwrite_buffer: # If we only care about most recent data, set this to true. Will cause the buffer to overwrite once full
   false
 read_size: # How many data points to pull off the buffer at a time. Batch processing, basically
-  10
+  100
 read_interval: # Seconds between reads from buffer
   2

@@ -4,32 +4,42 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/google/uuid"
+	"github.com/hyptocrypto/RinGo/config"
 )
 
-var clientID = uuid.New()
+var conf *config.Config
 
-func TestBufferLimit(t *testing.T) {
+func init() {
+	conf = config.LoadConfig("../config.yaml")
+}
+
+func TestBufferOverflowLimit(t *testing.T) {
 	buf := MakeFullBuffer()
-	// Try to over flow buffer
+	// Try to overflow buffer
 	data := []byte("Test data 10000")
-	err := buf.Write(clientID, data)
+	err := buf.Write(data)
 	if err == nil {
-		t.Error("Buffer overflow allowed")
+		t.Error("buffer overflow allowed")
+	}
+}
+
+func TestBufferRead(t *testing.T) {
+	buf := MakeFullBuffer()
+	data := buf.Read()
+	if len(data) != int(buf.readSize) {
+		t.Errorf("data length discrepancy. expected: %v received: %v", buf.readSize, len(data))
 	}
 }
 
 func MakeFullBuffer() *Buffer {
-	buf := NewBuffer(10)
-	numIterations := 10
 	// Fill buffer
-	for i := 0; i < numIterations; i++ {
+	buff := NewBuffer(conf.BufferSize, conf.ReadInterval, conf.ReadSize, conf.OverwriteBuffer)
+	for i := 0; i < int(conf.BufferSize); i++ {
 		data := []byte(fmt.Sprintf("Test data %d", i))
-		err := buf.Write(clientID, data)
-		fmt.Println(buf.writeIdx)
+		err := buff.Write(data)
 		if err != nil {
-			panic("Error writing to buffer")
+			panic("error writing to buffer")
 		}
 	}
-	return buf
+	return buff
 }
