@@ -14,13 +14,13 @@ trap cleanup INT
 pkill RinGo
 
 # Build and start the server
-go run .
+go run . &
 # Watch for changes in .go files
 fswatch . | while read f; do 
     extension="${f##*.}"
     if [ "$extension" = "go" ]; then
         echo "Changes detected. Restarting server."
         pkill RinGo
-        go run .
+        go run . &
     fi
 done

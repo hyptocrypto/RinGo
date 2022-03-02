@@ -3,10 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/hyptocrypto/RinGo/buffer"
+	"github.com/hyptocrypto/RinGo/config"
 )
 
 type RequestBody struct {
@@ -15,43 +17,58 @@ type RequestBody struct {
 }
 
 var buff *buffer.Buffer
+var conf *config.Config
+var dataChannel chan buffer.ReadChunk
 
 func init() {
-	buff = buffer.NewBuffer(10) // Initialize buffer with size 10
+	conf = config.LoadConfig("config.yaml")
+	buff = buffer.NewBuffer(conf.BufferSize, conf.ReadInterval, conf.ReadSize, conf.OverwriteBuffer)
+	dataChannel = make(chan buffer.ReadChunk)
 }
 
 func handleBuff(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		msg := "Invalid request method"
+		http.Error(w, msg, http.StatusMethodNotAllowed)
+		log.Println(msg)
 		return
 	}
 
 	var body RequestBody
 	err := json.NewDecoder(r.Body).Decode(&body)
-	fmt.Println(r.Body)
 	if err != nil {
-		http.Error(w, "Error reading request body", http.StatusInternalServerError)
+		msg := "Error reading request body"
+		http.Error(w, msg, http.StatusInternalServerError)
+		log.Println(msg)
 		return
 	}
-	fmt.Println(body)
+
 	deviceId, err := uuid.Parse(body.DeviceId)
 	if err != nil {
-		http.Error(w, "Invalid deviceId format", http.StatusBadRequest)
+		msg := "Invalid deviceId format"
+		http.Error(w, msg, http.StatusBadRequest)
+		log.Println(msg)
 		return
 	}
 
 	if err := buff.Write(deviceId, body.Data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		msg := err.Error()
+		http.Error(w, msg, http.StatusInternalServerError)
+		log.Println(msg)
 		return
 	}
 
-	fmt.Fprint(w, "Data stored successfully")
+	msg := fmt.Sprintf("Client(%v) data buffered", deviceId)
+	fmt.Fprint(w, msg)
+	log.Println(msg)
 }
 
 func main() {
 	http.HandleFunc("/buff", handleBuff)
 	fmt.Printf("RinGo server started \n")
-	if err := http.ListenAndServe(":5555", nil); err != nil {
+	go buffer.BufferReader(buff, dataChannel)
+	go buffer.BufferChanConsumer(dataChannel)
+	if err := http.ListenAndServe(conf.Port, nil); err != nil {
 		panic(err)
 	}
 }

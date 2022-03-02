@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import io
+import time
 from uuid import uuid4
 
 import aiohttp
@@ -18,7 +19,7 @@ def dummy_bytes():
 
 
 async def send_post_request(session, device_id):
-    url = "http://127.0.0.1:5555/buff"  # Replace this with your API endpoint
+    url = "http://127.0.0.1:5555/buff"
     data = {"deviceId": device_id, "data": dummy_bytes()}
     async with session.post(url, json=data) as response:
         print(
@@ -39,4 +40,6 @@ async def device_swarm(num_devices=100):
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(device_swarm())
+    for i in range(100):
+        loop.run_until_complete(device_swarm())
+        time.sleep(1)
