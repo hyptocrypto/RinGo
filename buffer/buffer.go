@@ -12,12 +12,6 @@ import (
 
 type ReadChunk = [][]byte
 
-// An IOT devices sending in data
-type Client struct {
-	id         uuid.UUID
-	clientAddr string
-}
-
 type Buffer struct {
 	mut          sync.Mutex
 	readIdx      uint16
@@ -123,6 +117,7 @@ func (b *Buffer) Read() (ReadChunk, error) {
 	return ret, errors.New("un-handled buffer read case")
 }
 
+// Read from channel at set interval
 func BufferReader(b *Buffer, out chan ReadChunk) {
 	for {
 		time.Sleep(time.Duration(b.readInterval) * time.Second)
@@ -142,7 +137,8 @@ func BufferReader(b *Buffer, out chan ReadChunk) {
 	}
 }
 
-func BufferChanConsumer(bufferChannel chan ReadChunk) {
+// Consume/process data that has been pulled from buffer
+func BufferConsumer(bufferChannel chan ReadChunk) {
 	for {
 		select {
 		case d, ok := <-bufferChannel:

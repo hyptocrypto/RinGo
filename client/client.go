@@ -13,6 +13,7 @@ type Clients struct {
 	clients map[string]*Client
 }
 
+// Client represents an IOT device sending data
 type Client struct {
 	ID   uuid.UUID
 	Addr string

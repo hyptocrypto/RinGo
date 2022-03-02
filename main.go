@@ -66,7 +66,7 @@ func main() {
 	http.HandleFunc("/buff", handleBuff)
 	fmt.Printf("RinGo server started \n")
 	go buffer.BufferReader(buff, dataChannel)
-	go buffer.BufferChanConsumer(dataChannel)
+	go buffer.BufferConsumer(dataChannel)
 	if err := http.ListenAndServe(conf.Port, nil); err != nil {
 		panic(err)
 	}
