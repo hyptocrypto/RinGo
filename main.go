@@ -50,7 +50,7 @@ func handleBuff(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// If all checks pass, write to the buffer
-	if err := buff.Write(client.ID, body.Data); err != nil {
+	if err := buff.Write(body.Data); err != nil {
 		msg := err.Error()
 		http.Error(w, msg, http.StatusInternalServerError)
 		log.Println(msg)
